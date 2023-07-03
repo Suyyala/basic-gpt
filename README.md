@@ -1,3 +1,3 @@
 # basic-gpt
 
- Auto regressive transformer architecture 
+Learning: Auto regressive transformer architecture 
