@@ -1,0 +1,86 @@
+
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
+from bigram import BigramModel
+
+# load data
+with open('data/input.txt', 'r', encoding='utf-8') as f:
+  text = f.read()
+
+print(text[:1000])
+
+chars = sorted(list(set(text)))
+vocab_size = len(chars)
+
+print(chars)
+print(vocab_size)
+
+# tokenization
+stoi = {ch: i for i, ch in enumerate(chars)}
+itos = {i: ch for i, ch in enumerate(chars)}
+print(stoi)
+print(itos)
+
+encode = lambda x: [stoi[ch] for ch in x]
+decode = lambda x: "".join([itos[i] for i in x])
+print(encode('hello world'))
+print(decode(encode('hello world')))
+
+
+data = torch.tensor(encode(text), dtype=torch.long)
+print(data.shape, data.dtype)
+print(data[:100])
+
+
+# split data
+n = int(0.9 * len(data))
+print(n)
+train_d = data[:n]
+val_d = data[n:]
+print(train_d.shape, val_d.shape)
+
+# hyper params
+batch_size = 4
+block_size = 8
+learning_rate = 1e-3
+max_iters = 1000
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+# to make results reproducible
+torch.manual_seed(42)
+
+def get_batch_data(data_type = 'train'):
+  data_set = train_d if data_type == 'train' else  val_d
+  ix = torch.randint(low=0, high=len(data_set) - block_size, size=(batch_size, ))
+  x = torch.stack([data[i:i+block_size] for i in ix])
+  y = torch.stack([data[i+1:i+block_size+1] for i in ix])
+  return x, y
+
+
+# instantiate model
+model = BigramModel(vocab_size=vocab_size)
+m = model.to(device)
+
+# training loop
+optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
+
+# training loop
+for steps in range(max_iters):
+  xb, yb = get_batch_data()
+  
+  # evaluate model
+  logits, loss = m(xb, yb)
+  optimizer.zero_grad(set_to_none=True)
+  loss.backward()
+  optimizer.step()
+
+print(loss.item())
+
+# generate text
+context = torch.zeros((1, 1), dtype=torch.long)
+decode(m.generate(idx=context, max_tokens=500)[0].tolist())
+
+# save model
+torch.save(m.state_dict(), 'models/bigram_model.pth')
+
