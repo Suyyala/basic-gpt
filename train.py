@@ -45,6 +45,7 @@ batch_size = 4
 block_size = 8
 learning_rate = 1e-3
 max_iters = 1000
+eval_interval = 100
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # to make results reproducible
@@ -57,6 +58,14 @@ def get_batch_data(data_type = 'train'):
   y = torch.stack([data[i+1:i+block_size+1] for i in ix])
   return x, y
 
+def estimate_loss(model, data_type='train'):
+    model.eval()
+    with torch.no_grad():
+        x, y = get_batch_data(data_type=data_type)
+        logits, loss = model(x, y)
+    
+    model.train()
+    return loss.item()
 
 # instantiate model
 model = BigramModel(vocab_size=vocab_size)
@@ -68,6 +77,13 @@ optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
 # training loop
 for steps in range(max_iters):
   xb, yb = get_batch_data()
+
+  # evaluate loss on train and validation set
+  if steps % eval_interval == 0:
+    train_loss = estimate_loss(m, data_type='train')
+    val_loss = estimate_loss(m, data_type='val')
+    print(f"step: {steps}, train_loss: {train_loss}, val_loss: {val_loss}")
+     
   
   # evaluate model
   logits, loss = m(xb, yb)
