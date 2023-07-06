@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from bigram import BigramModel
+from attention import AttnHead
+from decoder import DecoderModel
 
 # load data
 with open('data/input.txt', 'r', encoding='utf-8') as f:
@@ -68,7 +70,8 @@ def estimate_loss(model, data_type='train'):
     return loss.item()
 
 # instantiate model
-model = BigramModel(vocab_size=vocab_size)
+# model = BigramModel(vocab_size=vocab_size)
+model = DecoderModel(vocab_size=vocab_size, head_size=vocab_size)
 m = model.to(device)
 
 # training loop

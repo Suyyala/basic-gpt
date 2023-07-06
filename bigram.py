@@ -27,3 +27,15 @@ class BigramModel(nn.Module):
       id_next = torch.multinomial(probs, num_samples=1) # B, 1
       idx = torch.cat((idx, id_next), dim=1) # B, T+1
     return idx
+  
+# test bigram
+if __name__ == '__main__':
+    model = BigramModel(vocab_size=10)
+    idx = torch.randint(0, 10, (3, 5))
+    logits, loss = model(idx, targets=idx)
+    print(logits.shape)
+    print(loss)
+    idx = torch.randint(0, 10, (3, 5))
+    idx = model.generate(idx, max_tokens=10)
+    print(idx.shape)
+    print(idx)
