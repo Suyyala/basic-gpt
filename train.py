@@ -98,9 +98,13 @@ for steps in range(max_iters):
 print(loss.item())
 
 # generate text
+print('generating text...')
 context = torch.zeros((1, 1), dtype=torch.long)
-decode(m.generate(idx=context, max_tokens=500)[0].tolist())
+idx = m.generate(idx=context, max_tokens=500)[0].tolist()
+print(idx)
+print(decode(idx))
 
 # save model
+print('saving model...')
 torch.save(m.state_dict(), 'models/bigram_model.pth')
 

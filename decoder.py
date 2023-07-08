@@ -37,6 +37,7 @@ class DecoderModel(nn.Module):
     def generate(self, idx, max_tokens):
         # B, T is indices of current context
         for i in range(max_tokens):
+            #print(idx.shape)
             idx_cond = idx[:, -self.block_size:]
             logits, loss = self(idx_cond)
             # get latest timestep logits
@@ -44,6 +45,7 @@ class DecoderModel(nn.Module):
             probs = F.softmax(logits, dim=-1)
             id_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, id_next), dim=1)
+        print(idx.shape)
         return idx
 
 # test decoder
