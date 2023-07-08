@@ -6,20 +6,26 @@ from attention import AttnHead
 
 # extension of bigram model to include attention and positional encoding
 class DecoderModel(nn.Module):
-    def __init__(self, vocab_size, head_size=16):
+    def __init__(self, vocab_size, head_size=16, block_size=128, embed_dim=128):
         super().__init__()
-        self.token_embeddings_table = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vocab_size)
-        self.attn_head = AttnHead(embed_dim=vocab_size, head_size=head_size)
-        self.pos_enc = nn.Parameter(torch.zeros(1, 1, vocab_size))
-        self.out = nn.Linear(vocab_size, vocab_size)
+        self.vocab_size = vocab_size
+        self.head_size = head_size
+        self.block_size = block_size
+        self.n_embd = embed_dim
+        self.token_embed = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embed_dim)
+        self.position_embed = nn.Embedding(num_embeddings=block_size, embedding_dim=embed_dim)
+        self.attn_head = AttnHead(embed_dim=embed_dim, head_size=head_size) # B, T, H
+        self.out = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, idx, targets=None):
         # idx: B, T
         # targets: B, T
-        logits = self.token_embeddings_table(idx)
-        logits = logits + self.pos_enc
-        logits = self.attn_head(logits)
-        logits = self.out(logits)
+        B, T = idx.shape
+        token_emb = self.token_embed(idx)  # B, T, C
+        pos_emb = self.position_embed(torch.arange(T, device=idx.device)) # T, C
+        x = token_emb + pos_emb # B, T, C
+        x = self.attn_head(x)
+        logits = self.out(x)
         if targets is None:
             return logits, None
         B, T, C = logits.shape
@@ -31,7 +37,8 @@ class DecoderModel(nn.Module):
     def generate(self, idx, max_tokens):
         # B, T is indices of current context
         for i in range(max_tokens):
-            logits, loss = self(idx)
+            idx_cond = idx[:, -self.block_size:]
+            logits, loss = self(idx_cond)
             # get latest timestep logits
             logits = logits[:, -1, :]
             probs = F.softmax(logits, dim=-1)

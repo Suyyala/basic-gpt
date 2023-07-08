@@ -25,4 +25,5 @@ class AttnHead(nn.Module):
         w = F.softmax(w, dim=-1)
         # weighted sum
         out = w @ value # B, T, T @ B, T, H -> B, T, H
+        # print(out.shape)
         return out

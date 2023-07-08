@@ -45,6 +45,7 @@ print(train_d.shape, val_d.shape)
 # hyper params
 batch_size = 4
 block_size = 8
+n_embd = 128
 learning_rate = 1e-3
 max_iters = 1000
 eval_interval = 100
@@ -71,7 +72,7 @@ def estimate_loss(model, data_type='train'):
 
 # instantiate model
 # model = BigramModel(vocab_size=vocab_size)
-model = DecoderModel(vocab_size=vocab_size, head_size=vocab_size)
+model = DecoderModel(vocab_size=vocab_size, block_size=block_size, embed_dim=n_embd, head_size=n_embd)
 m = model.to(device)
 
 # training loop
