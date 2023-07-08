@@ -21,6 +21,8 @@ class AttentionBlock(nn.Module):
     def forward(self, x):
         # x: B, T, C
         B, T, C = x.shape
-        x = self.attn_head(x)
-        x = self.ffwd(x)
+        # add residual connection
+        x = x + self.attn_head(x)
+        # add residual connection
+        x = x + self.ffwd(x)
         return x
