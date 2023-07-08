@@ -15,7 +15,7 @@ class MultiHeadAttention(nn.Module):
         # x: B, T, C
         B, T, C = x.shape
         # concat all heads
-        out = torch.cat([head(x) for head in self.heads], dim=-1)
+        out = torch.cat([head(x) for head in self.heads], dim=-1) # B, T, H * num_heads
         return out
     
 
