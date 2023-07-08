@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from attention import AttnHead
+from multi_head import MultiHeadAttention
 
 # extension of bigram model to include attention and positional encoding
 class DecoderModel(nn.Module):
@@ -12,9 +12,10 @@ class DecoderModel(nn.Module):
         self.head_size = head_size
         self.block_size = block_size
         self.n_embd = embed_dim
+        self.num_heads = 4
         self.token_embed = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embed_dim)
         self.position_embed = nn.Embedding(num_embeddings=block_size, embedding_dim=embed_dim)
-        self.attn_head = AttnHead(embed_dim=embed_dim, head_size=head_size) # B, T, H
+        self.attn_head = MultiHeadAttention(num_heads=self.num_heads, embed_dim=embed_dim, head_size=head_size // self.num_heads) # B, T, H
         self.out = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, idx, targets=None):
