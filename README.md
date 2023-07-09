@@ -1,4 +1,4 @@
-# basic-gpt
+# basic-gpt -  based on karpathy videos
 
 Learning: Auto regressive transformer architecture 
 
