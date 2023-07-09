@@ -48,7 +48,7 @@ block_size = 32
 num_attn_blocks = 16
 n_embd = 128
 learning_rate = 1e-3
-max_iters = 5000
+max_iters = 3000
 eval_interval = 100
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
