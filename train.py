@@ -43,12 +43,12 @@ val_d = data[n:]
 print(train_d.shape, val_d.shape)
 
 # hyper params
-batch_size = 4
-block_size = 8
+batch_size = 128
+block_size = 32
 num_attn_blocks = 16
 n_embd = 128
 learning_rate = 1e-3
-max_iters = 1000
+max_iters = 5000
 eval_interval = 100
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

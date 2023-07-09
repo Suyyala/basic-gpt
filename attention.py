@@ -10,6 +10,7 @@ class AttnHead(nn.Module):
         self.k = nn.Linear(embed_dim, head_size)
         self.v = nn.Linear(embed_dim, head_size)
         self.q = nn.Linear(embed_dim, head_size)
+        self.dropout = nn.Dropout(0.1)
         self.register_buffer('mask', torch.tril(torch.ones(head_size, head_size)))
 
     def forward(self, x):
@@ -23,6 +24,8 @@ class AttnHead(nn.Module):
         w = w.masked_fill(self.mask[:T, :T] == 0, float('-inf'))
         # normalize
         w = F.softmax(w, dim=-1)
+        # dropout
+        w = self.dropout(w)
         # weighted sum
         out = w @ value # B, T, T @ B, T, H -> B, T, H
         # print(out.shape)

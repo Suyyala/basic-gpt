@@ -11,6 +11,7 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.heads = nn.ModuleList([AttnHead(embed_dim=embed_dim, head_size=head_size) for _ in range(num_heads)])
         self.proj = nn.Linear(embed_dim, embed_dim)
+        self.dropout = nn.Dropout(0.1)
 
     def forward(self, x):
         # x: B, T, C
@@ -19,6 +20,8 @@ class MultiHeadAttention(nn.Module):
         out = torch.cat([head(x) for head in self.heads], dim=-1) # B, T, H * num_heads
         # project back to embedding dimension
         out = self.proj(out) # B, T, C
+        # dropout
+        out = self.dropout(out)
         return out
     
 

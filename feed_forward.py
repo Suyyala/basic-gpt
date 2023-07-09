@@ -14,6 +14,7 @@ class FeedForward(nn.Module):
         )
         # add projection to embedding dimension
         self.proj = nn.Linear(self.multiplier * embed_dim, embed_dim)
+        self.dropout = nn.Dropout(0.1)
     
     def forward(self, x):
         # x: B, T, C
@@ -22,4 +23,6 @@ class FeedForward(nn.Module):
         x = self.ffn(x)
         # project back to embedding dimension
         x = self.proj(x)
+        # dropout
+        x = self.dropout(x)
         return x
