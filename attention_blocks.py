@@ -17,12 +17,14 @@ class AttentionBlock(nn.Module):
         self.head_size = embed_dim // num_heads
         self.attn_head = MultiHeadAttention(num_heads=num_heads, embed_dim=embed_dim, head_size=self.head_size)
         self.ffwd = FeedForward()
+        self.ln1 = nn.LayerNorm(embed_dim)
+        self.ln2 = nn.LayerNorm(embed_dim)
 
     def forward(self, x):
         # x: B, T, C
         B, T, C = x.shape
         # add residual connection
-        x = x + self.attn_head(x)
+        x = x + self.attn_head(self.ln1(x))
         # add residual connection
-        x = x + self.ffwd(x)
+        x = x + self.ffwd(self.ln2(x))
         return x
